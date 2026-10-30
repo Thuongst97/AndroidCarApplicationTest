@@ -1,0 +1,33 @@
+package com.pidash.companion.robots
+
+import androidx.compose.runtime.Composable
+import com.pidash.companion.testing.AppComposeRule
+import com.pidash.companion.testing.BaseRobot
+import com.pidash.companion.ui.components.TestTags
+// import com.pidash.companion.ui.__screen__.__Screen__Actions
+// import com.pidash.companion.ui.__screen__.__Screen__Screen
+// import com.pidash.companion.ui.__screen__.__Screen__UiState
+
+/**
+ * Robot for __Screen__Screen. Owns selectors and gestures; tests only call verbs and checks.
+ */
+class __Screen__Robot(rule: AppComposeRule) : BaseRobot(rule) {
+
+    /** [state] is read in composition: back it with mutableStateOf or collectAsState(). */
+    fun launch(actions: __Screen__Actions = __Screen__Actions(), state: @Composable () -> __Screen__UiState) {
+        rule.setContent { __Screen__Screen(state(), actions) }
+    }
+
+    // ---- actions: one verb per user action ----
+    fun tapSave() = tap(TestTags.__SCREEN___SAVE)
+
+    // ---- checks: each verifies every aspect of one state ----
+    fun assertSaved(saved: Boolean) {
+        assertStateDescription(TestTags.__SCREEN___SAVE, if (saved) "Saved" else "Not saved")
+        // assertSemantics(TestTags.X, MySemantics.Key, value)
+    }
+}
+
+fun AppComposeRule.__screen__(block: __Screen__Robot.() -> Unit) {
+    __Screen__Robot(this).block()
+}

@@ -1,0 +1,17 @@
+package com.pidash.companion
+
+import androidx.compose.runtime.Composable
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.runner.RunWith
+// import com.pidash.companion.ui.__screen__.__Screen__Actions
+// import com.pidash.companion.ui.__screen__.__Screen__Screen
+
+/**
+ * Standard UI contract for __Screen__Screen: dark/light/max-font rendering (+ screenshots),
+ * accessible labels, minimum touch target, rotary reachability.
+ */
+@RunWith(AndroidJUnit4::class)
+class __Screen__ScreenContractTest : PiDashScreenContract() {
+    @Composable
+    override fun Content() = __Screen__Screen(TestData.__screen__, __Screen__Actions())
+}

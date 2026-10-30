@@ -1,0 +1,51 @@
+package com.pidash.companion
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.pidash.companion.robots.__screen__
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+/** Behaviour tests for __Screen__Screen. Generic UI checks live in __Screen__ScreenContractTest. */
+@RunWith(AndroidJUnit4::class)
+class __Screen__ScreenTest {
+
+    @get:Rule
+    val rule = piDashComposeRule()
+
+    // Pattern 1 — state-driven: change state, assert the UI follows.
+    @Test
+    fun saveButton_stateChanges_showsSavedState() = rule.__screen__ {
+        // Given
+        var state by mutableStateOf(TestData.__screen__)
+        launch { state }
+        assertSaved(false)
+
+        // When
+        state = state.copy(saved = true)
+
+        // Then
+        assertSaved(true)
+    }
+
+    // Pattern 2 — callback: perform the action, assert the callback after the robot block.
+    @Test
+    fun saveButton_tapped_invokesCallback() {
+        // Given
+        var saves = 0
+
+        rule.__screen__ {
+            launch(__Screen__Actions(onSave = { saves++ })) { TestData.__screen__ }
+
+            // When
+            tapSave()
+        }
+
+        // Then
+        assertEquals(1, saves)
+    }
+}
