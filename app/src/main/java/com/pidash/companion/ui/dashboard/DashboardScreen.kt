@@ -376,7 +376,7 @@ private fun SpotCategory.shortLabel() = when (this) {
     else -> label
 }
 
-private fun WeatherCondition.icon(): ImageVector = when (this) {
+fun WeatherCondition.icon(): ImageVector = when (this) {
     WeatherCondition.CLEAR -> Icons.Outlined.WbSunny
     WeatherCondition.PARTLY_CLOUDY -> Icons.Outlined.FilterDrama
     WeatherCondition.CLOUDY -> Icons.Outlined.Cloud

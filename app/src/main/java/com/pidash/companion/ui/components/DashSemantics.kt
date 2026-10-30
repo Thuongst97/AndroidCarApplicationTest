@@ -19,9 +19,13 @@ object DashSemantics {
 
     /** True when the speed exceeds the current limit and the gauge is in alert colors. */
     val SpeedAlert = SemanticsPropertyKey<Boolean>("SpeedAlert")
+
+    /** Progress (0..1) of an expand/collapse reveal, e.g. the full-screen clock. */
+    val RevealFraction = SemanticsPropertyKey<Float>("RevealFraction")
 }
 
 var SemanticsPropertyReceiver.speedKmh by DashSemantics.SpeedKmh
 var SemanticsPropertyReceiver.rotaryFocused by DashSemantics.RotaryFocused
 var SemanticsPropertyReceiver.glowActive by DashSemantics.GlowActive
 var SemanticsPropertyReceiver.speedAlert by DashSemantics.SpeedAlert
+var SemanticsPropertyReceiver.revealFraction by DashSemantics.RevealFraction

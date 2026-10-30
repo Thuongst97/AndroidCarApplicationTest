@@ -20,6 +20,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.pidash.companion.ui.clock.ClockViewModel
+import com.pidash.companion.ui.clock.LuxuryClockOverlay
+import com.pidash.companion.ui.clock.LuxuryClockState
+import com.pidash.companion.ui.clock.RailClock
+import com.pidash.companion.ui.clock.rememberLuxuryClockState
 import com.pidash.companion.ui.components.SectionLabel
 import com.pidash.companion.ui.components.rememberPressScale
 import com.pidash.companion.ui.components.rotaryFocused
@@ -130,6 +135,9 @@ fun PiDashApp(
     val focusManager = LocalFocusManager.current
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
+    val clockState = rememberLuxuryClockState()
+    val clockViewModel: ClockViewModel = hiltViewModel()
+    val clockWeather by clockViewModel.weather.collectAsStateWithLifecycle()
 
     Box(
         Modifier
@@ -137,12 +145,17 @@ fun PiDashApp(
             .ambientBackground(DashTheme.colors)
             // Rotary controllers (or a DIY encoder knob) emit scroll events: map them to focus traversal.
             .onRotaryScrollEvent { event ->
+                // While the full-screen clock is open the knob turns its pages instead of moving focus behind it.
+                if (clockState.isOpen) {
+                    if (event.verticalScrollPixels > 0) clockState.nextPage() else clockState.previousPage()
+                    return@onRotaryScrollEvent true
+                }
                 focusManager.moveFocus(if (event.verticalScrollPixels > 0) FocusDirection.Next else FocusDirection.Previous)
             }
             .focusable(),
     ) {
         Row(Modifier.fillMaxSize()) {
-            NavigationRail(currentRoute = currentRoute, onSelect = navController::navigateToTopLevel)
+            NavigationRail(currentRoute = currentRoute, onSelect = navController::navigateToTopLevel, clockState = clockState)
             NavHost(navController, startDestination = Routes.DASHBOARD, modifier = Modifier.weight(1f).fillMaxHeight()) {
                 composable(Routes.DASHBOARD) {
                     val vm: DashboardViewModel = hiltViewModel()
@@ -178,12 +191,13 @@ fun PiDashApp(
                 }
             }
         }
+        LuxuryClockOverlay(clockState, weather = clockWeather)
         SnackbarHost(snackbarHostState, Modifier.align(Alignment.BottomCenter).padding(24.dp))
     }
 }
 
 @Composable
-private fun NavigationRail(currentRoute: String?, onSelect: (String) -> Unit) {
+private fun NavigationRail(currentRoute: String?, onSelect: (String) -> Unit, clockState: LuxuryClockState) {
     val colors = DashTheme.colors
     Column(
         Modifier
@@ -203,7 +217,7 @@ private fun NavigationRail(currentRoute: String?, onSelect: (String) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Clock()
+        RailClock(onClick = clockState::open, onPositioned = { clockState.origin = it })
         Spacer(Modifier.height(18.dp))
         destinations.forEach { dest ->
             val selected = currentRoute?.substringBefore('?') == dest.baseRoute
@@ -271,26 +285,3 @@ private fun RailItem(icon: ImageVector, label: String, selected: Boolean, onClic
     }
 }
 
-@Composable
-private fun Clock() {
-    var now by remember { mutableStateOf(LocalDateTime.now()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = LocalDateTime.now()
-            delay(1_000)
-        }
-    }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            now.format(DateTimeFormatter.ofPattern("HH:mm")),
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraLight, fontSize = 32.sp),
-            color = DashTheme.colors.textPrimary,
-        )
-        Text(
-            now.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.US)).uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-            color = DashTheme.colors.accent,
-            maxLines = 1,
-        )
-    }
-}

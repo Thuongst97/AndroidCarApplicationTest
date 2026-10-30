@@ -9,6 +9,25 @@ object TestTags {
     const val NAV_DASHBOARD = "nav_dashboard"
     const val NAV_MEDIA = "nav_media"
     const val NAV_SPOTS = "nav_spots"
+    const val NAV_CLOCK = "nav_clock"
+
+    // Luxury clock
+    const val LUXURY_CLOCK = "luxury_clock"
+    const val LUXURY_CLOCK_TIME = "luxury_clock_time"
+    const val LUXURY_CLOCK_SECONDS = "luxury_clock_seconds"
+    const val LUXURY_CLOCK_DIAL = "luxury_clock_dial"
+    const val LUXURY_CLOCK_DATE = "luxury_clock_date"
+    const val LUXURY_CLOCK_CLOSE = "luxury_clock_close"
+    const val LUXURY_CLOCK_PAGER = "luxury_clock_pager"
+    const val CLOCK_PAGE_INDICATOR = "clock_page_indicator"
+    const val CLOCK_PAGE_COCKPIT = "clock_page_cockpit"
+    const val CLOCK_PAGE_RECTANGLE = "clock_page_rectangle"
+    const val CLOCK_RECTANGLE_FACE = "clock_rectangle_face"
+    const val CLOCK_PAGE_WEATHER = "clock_page_weather"
+    const val CLOCK_WEATHER_TIME = "clock_weather_time"
+    const val CLOCK_WEATHER_LOCATION = "clock_weather_location"
+    const val CLOCK_WEATHER_TEMPERATURE = "clock_weather_temperature"
+    const val CLOCK_WEATHER_CONDITION = "clock_weather_condition"
 
     // Dashboard
     const val DASHBOARD_SCREEN = "dashboard_screen"

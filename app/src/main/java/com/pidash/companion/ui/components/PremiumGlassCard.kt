@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
@@ -95,8 +96,13 @@ fun PremiumGlassCard(
 
 /** Small tracked-uppercase caption used as a section header, instrument-cluster style. */
 @Composable
-fun SectionLabel(text: String, modifier: Modifier = Modifier, color: Color = DashTheme.colors.textTertiary) {
-    Text(text.uppercase(), style = MaterialTheme.typography.labelMedium, color = color, modifier = modifier, maxLines = 1)
+fun SectionLabel(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = DashTheme.colors.textTertiary,
+    style: TextStyle = MaterialTheme.typography.labelMedium,
+) {
+    Text(text.uppercase(), style = style, color = color, modifier = modifier, maxLines = 1)
 }
 
 /** Spring-based "press down" feedback shared by all tappable components. */

@@ -22,7 +22,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -34,9 +36,14 @@ class MockTripRepository @Inject constructor() : TripRepository {
     override val tripData: Flow<TripData> = MockSpeedGenerator().stream()
 }
 
-/** Cycles through locations along a simulated route, refreshing like a real weather API would. */
+/**
+ * Cycles through locations along a simulated route, refreshing like a real weather API would.
+ * Shared (one upstream, replay = 1) so every screen shows the same location at the same time.
+ */
 @Singleton
-class MockWeatherRepository @Inject constructor() : WeatherRepository {
+class MockWeatherRepository @Inject constructor(
+    @ApplicationScope scope: CoroutineScope,
+) : WeatherRepository {
     private val samples = listOf(
         Weather(29, WeatherCondition.CLEAR, "Da Nang City", 70),
         Weather(28, WeatherCondition.PARTLY_CLOUDY, "Son Tra Peninsula", 74),
@@ -52,7 +59,7 @@ class MockWeatherRepository @Inject constructor() : WeatherRepository {
             index++
             delay(30_000)
         }
-    }
+    }.shareIn(scope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 }
 
 /** In-memory player that advances the playback position while playing and auto-advances tracks. */
