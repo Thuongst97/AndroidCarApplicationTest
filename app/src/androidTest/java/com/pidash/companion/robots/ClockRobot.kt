@@ -49,10 +49,25 @@ class ClockRobot(rule: AppComposeRule) : BaseRobot(rule) {
     // ---- actions ----
     fun tapRailClock() = tap(TestTags.NAV_CLOCK)
     fun tapClose() = tap(TestTags.LUXURY_CLOCK_CLOSE)
-    fun tapBackground() = node(TestTags.LUXURY_CLOCK).performTouchInput { click(bottomLeft + androidx.compose.ui.geometry.Offset(40f, -40f)) }
-    fun pressBack() = Espresso.pressBack()
-    fun swipeUp() = node(TestTags.LUXURY_CLOCK_PAGER).performTouchInput { swipeUp() }
-    fun swipeDown() = node(TestTags.LUXURY_CLOCK_PAGER).performTouchInput { swipeDown() }
+    fun tapBackground() {
+        node(TestTags.LUXURY_CLOCK).performTouchInput { click(bottomLeft + androidx.compose.ui.geometry.Offset(40f, -40f)) }
+        rule.observe()
+    }
+
+    fun pressBack() {
+        Espresso.pressBack()
+        rule.observe()
+    }
+
+    fun swipeUp() {
+        node(TestTags.LUXURY_CLOCK_PAGER).performTouchInput { swipeUp() }
+        rule.observe()
+    }
+
+    fun swipeDown() {
+        node(TestTags.LUXURY_CLOCK_PAGER).performTouchInput { swipeDown() }
+        rule.observe()
+    }
 
     // ---- checks ----
     fun assertRailClock(time: String, date: String) {

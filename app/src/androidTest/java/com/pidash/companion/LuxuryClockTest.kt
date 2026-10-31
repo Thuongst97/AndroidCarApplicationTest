@@ -91,6 +91,7 @@ class LuxuryClockTest {
     }
 
     @Test
+    @Smoke
     fun fullScreenClock_swipedUp_showsRectangleThenWeatherClock() = rule.clock {
         launch(fixedTime, weather = TestData.clearWeather)
         tapRailClock()

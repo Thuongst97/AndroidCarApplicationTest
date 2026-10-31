@@ -36,6 +36,7 @@ class FavoriteSpotsTest {
         TestData.spots.filter { it.category == category }.sortedBy { it.distanceKm }.map { it.id }
 
     @Test
+    @Smoke
     fun categoryChip_coffeeSelected_listShowsOnlyCoffeeSpots() {
         // Given
         val vm = viewModel()

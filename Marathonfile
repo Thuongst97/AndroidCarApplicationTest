@@ -1,0 +1,57 @@
+# Marathon test runner configuration (https://docs.marathonlabs.io)
+# Build APKs first:  .\gradlew :app:assembleDebug :app:assembleDebugAndroidTest
+# Run:               marathon            (from the project root)
+# Report:            app/build/reports/marathon/html/index.html
+
+name: "Pi-Dash Compose UI tests"
+outputDir: "app/build/reports/marathon"
+
+# Marathon sends anonymous usage data / crash reports by default — keep them off.
+analyticsTracking: false
+bugsnagReporting: false
+
+# Retry tests that fail (flaky detection); a test passing on retry is reported as flaky.
+retryStrategy:
+  type: "fixed-quota"
+  totalAllowedRetryQuota: 10
+  retryPerTestQuota: 2
+
+# Marathon's own screen capture is disabled on this device (see vendorConfiguration below);
+# evidence screenshots for every test come from the tests themselves.
+
+# Only use the head unit's IP:port entry. ADB can also list the same Pi a second time via mDNS
+# auto-discovery; without this filter Marathon would treat it as two devices and run tests twice.
+# Update the IP if the Pi's address changes (see `adb devices`).
+includeSerialRegexes:
+  - ".*192\\.168\\.1\\.140:.*"   # Marathon prefixes serials with the adb server, e.g. 127.0.0.1:5037:<ip:port>
+
+vendorConfiguration:
+  type: "Android"
+  serialStrategy: "ddms"          # identify devices by their adb serial (IP:port)
+  androidSdk: "C:\\Users\\Hi\\AppData\\Local\\Android\\Sdk"
+  applicationApk: "app/build/outputs/apk/debug/app-debug.apk"
+  testApplicationApk: "app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+  autoGrantPermission: true
+  # Marathon's own capture does not work on this Raspberry Pi: its framebuffer screenshots come back
+  # empty and `screenrecord` fails (no hardware video encoder, err=-38). Disable both, and collect
+  # the screenshots the tests take themselves instead (see instrumentationArgs + fileSyncConfiguration).
+  screenRecordConfiguration:
+    videoConfiguration:
+      enabled: false
+    screenshotConfiguration:
+      enabled: false
+  # Tests capture the final screen of EVERY test (evidence/) and of failures (screenshots/) into
+  # /sdcard/Android/data/com.pidash.companion/files/test-screenshots/ (testing/Screenshots.kt).
+  instrumentationArgs:
+    evidenceScreenshots: "true"
+    # Observation mode for video recordings (testing/AppComposeRule.kt): after every test action the UI
+    # plays in real time for observeStepMs, and the final screen is held for observeHoldMs before the
+    # test closes. Set both to "0" for a fast run.
+    observeStepMs: "1500"
+    observeHoldMs: "3000"
+  # ...and Marathon pulls that folder back after the run.
+  fileSyncConfiguration:
+    pull:
+      - relativePath: "Android/data/com.pidash.companion/files/test-screenshots"
+        aggregationMode: TEST_RUN
+        pathRoot: EXTERNAL_STORAGE

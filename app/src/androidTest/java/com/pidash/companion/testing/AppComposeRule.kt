@@ -14,6 +14,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Density
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.rules.RuleChain
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -39,7 +40,17 @@ class AppComposeRule(
     @Suppress("DEPRECATION") private val delegate: ComposeContentTestRule = createComposeRule(),
 ) : ComposeContentTestRule by delegate {
 
-    private val chain: RuleChain = RuleChain.outerRule(delegate).around(ScreenshotOnFailureRule(delegate))
+    /**
+     * Observation mode for recorded runs (e.g. Marathon + video). Off by default; enabled with the
+     * runner arguments `observeStepMs` (real-time play after each step) and `observeHoldMs` (hold
+     * the final screen). Normal runs keep the fast virtual clock.
+     */
+    val observeStepMs: Long = runnerArg("observeStepMs")
+    val observeHoldMs: Long = runnerArg("observeHoldMs")
+
+    // Hold the final screen before the evidence/failure screenshot and teardown.
+    private val chain: RuleChain = RuleChain.outerRule(delegate)
+        .around(ScreenshotOnFailureRule(delegate, beforeCapture = { observe(observeHoldMs) }))
 
     private var focusManager: FocusManager? = null
     private var inputModeManager: InputModeManager? = null
@@ -61,6 +72,22 @@ class AppComposeRule(
                 inputModeManager = LocalInputModeManager.current
                 config.themeWrapper(darkTheme, content)
             }
+        }
+        observe() // let the first screen (and its intro animations) be seen
+    }
+
+    /**
+     * In observation mode, plays the UI in **real time** for [ms]: the virtual test clock is
+     * advanced one frame (16 ms) at a time with a real 16 ms sleep, so animations started by the
+     * previous action run at their true speed on the device (visible on screen recordings).
+     * No-op when observation mode is off. Robots call this after every action; tests can call it
+     * after direct state changes they want to be visible.
+     */
+    fun observe(ms: Long = observeStepMs) {
+        if (ms <= 0) return
+        repeat((ms / FRAME_MS).toInt()) {
+            delegate.mainClock.advanceTimeByFrame()
+            Thread.sleep(FRAME_MS)
         }
     }
 
@@ -84,5 +111,10 @@ class AppComposeRule(
         }
     }
 }
+
+private const val FRAME_MS = 16L
+
+private fun runnerArg(name: String): Long =
+    InstrumentationRegistry.getArguments().getString(name)?.toLongOrNull() ?: 0L
 
 fun createAppComposeRule(config: ComposeTestConfig): AppComposeRule = AppComposeRule(config)

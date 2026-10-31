@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}} — ATR report</title>
+<style>/*{{CSS}}*/</style>
+</head>
+<body>
+<header id="header"></header>
+<main>
+  <section id="kpis" class="kpis"></section>
+  <section class="grid-2">
+    <div class="card"><h2>Results</h2><div id="donut"></div></div>
+    <div class="card"><h2>Suites</h2><div id="suite-bars"></div></div>
+  </section>
+  <section class="card"><h2>Timeline</h2><div id="timeline"></div></section>
+  <section class="card">
+    <div class="toolbar">
+      <h2>Tests</h2>
+      <div class="filters" id="filters"></div>
+      <select id="suite-filter" aria-label="Suite"></select>
+      <input id="search" type="search" placeholder="Search tests…" aria-label="Search tests">
+    </div>
+    <div id="tests"></div>
+  </section>
+  <section class="card"><h2>Environment</h2><div id="env"></div></section>
+</main>
+<footer id="footer"></footer>
+<div id="lightbox" class="lightbox" hidden><img alt=""><div class="lb-caption"></div></div>
+<script id="atr-data" type="application/json">{{DATA}}</script>
+<script id="atr-extras" type="application/json">{{EXTRAS}}</script>
+<script>/*{{JS}}*/</script>
+</body>
+</html>

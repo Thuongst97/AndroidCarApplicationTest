@@ -92,6 +92,7 @@ class DashboardScreenTest {
     }
 
     @Test
+    @Smoke
     fun muteAndTheme_toggled_reflectNewSettingsState() = rule.dashboard {
         var settings by mutableStateOf(SystemSettings(isDarkTheme = true, isMuted = false))
         launch(

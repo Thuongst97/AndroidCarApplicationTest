@@ -1,0 +1,46 @@
+# ATR — Android Test Runner configuration.
+# Relative paths are resolved against the folder of this file.
+# Command-line options override these values (see: atr help).
+
+name: "My app UI tests"            # shown in the report header
+
+device:
+  serial:                           # e.g. emulator-5554 or 192.168.1.20:5555; empty = the only connected device
+
+apks:                               # built by Gradle: assembleDebug assembleDebugAndroidTest
+  app: app/build/outputs/apk/debug/app-debug.apk
+  test: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+install: true                       # install both APKs before running
+
+appPackage:                         # e.g. com.example.app; used to pick the instrumentation
+instrumentation: auto               # or com.example.app.test/androidx.test.runner.AndroidJUnitRunner
+
+instrumentationArgs:                # passed to every test as `-e key value`
+  # myFlag: "true"
+
+tags:                               # --include/--exclude aliases → annotation classes
+  # Smoke: com.example.app.Smoke
+  # Large: androidx.test.filters.LargeTest
+
+execution:
+  retries: 0                        # extra attempts for failing tests (pass on retry = FLAKY)
+  timeoutSeconds: 300               # per test
+
+artifacts:
+  video: always                     # always | on-failure | never  (needs scrcpy)
+  logcat: true
+  pullPaths: []                     # device folders copied after each test, e.g. screenshots:
+    # - /sdcard/Android/data/com.example.app/files/test-screenshots
+
+scrcpy:
+  path: scrcpy                      # executable name on PATH or full path
+  args:
+    - --video-codec=h264
+    - --max-fps=15
+    - --video-bit-rate=2M
+    # - --video-encoder=c2.android.avc.encoder   # software encoder for devices without a HW encoder
+
+output:
+  dir: atr-results
+  # robot: results/android.xml     # also write a Robot Framework output.xml (merge with: rebot ... android.xml)
+  # robotLegacy: false              # true = Robot Framework 6 format

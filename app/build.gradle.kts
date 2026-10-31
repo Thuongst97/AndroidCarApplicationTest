@@ -102,6 +102,88 @@ tasks.register<JacocoReport>("jacocoMergedReport") {
     }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Marathon: attach the tests' own screenshots and a video clip per test to Marathon's HTML report.
+//   .\scripts\marathon-with-video.ps1          (records video, runs Marathon, then calls this task)
+//   ./gradlew :app:attachMarathonEvidence      (-PmarathonReport=app/build/reports/marathon-review)
+// Marathon's own screen capture doesn't work on the Raspberry Pi, so each test page has an empty
+// "screenshot" field and no videos. This fills them in:
+// - screenshot: evidence/<Class>_<method>.png (passed) or screenshots/<Class>_<method>.png (failed),
+//   pulled from the device into <report>/device-files/test-screenshots/
+// - videos: <report>/video/run.mp4#t=<start>,<end> — the test's own time range in the run video
+//   recorded by scrcpy (run.start holds the epoch ms of the video's first frame).
+// ---------------------------------------------------------------------------------------------
+tasks.register("attachMarathonEvidence") {
+    group = "verification"
+    description = "Embeds evidence screenshots and per-test video clips into Marathon's HTML report."
+    val reportDir = rootProject.layout.projectDirectory.dir(
+        providers.gradleProperty("marathonReport").getOrElse("app/build/reports/marathon"),
+    ).asFile
+
+    doLast {
+        val html = File(reportDir, "html")
+        val pulled = File(reportDir, "device-files/test-screenshots")
+        require(html.isDirectory) { "No Marathon HTML report in $reportDir — run marathon first." }
+        val target = File(html, "evidence").apply { mkdirs() }
+
+        // Per-test timing from Marathon (timestamp = test start, epoch ms). Last attempt wins on retries.
+        val timings = mutableMapOf<String, Pair<Long, Long>>()
+        val raw = File(reportDir, "test_result/raw.json")
+        if (raw.isFile) {
+            @Suppress("UNCHECKED_CAST")
+            (groovy.json.JsonSlurper().parse(raw) as List<Map<String, Any?>>).forEach { t ->
+                timings["${t["class"]}#${t["method"]}"] = (t["timestamp"] as Number).toLong() to (t["duration"] as Number).toLong()
+            }
+        }
+        val video = File(reportDir, "video/run.mp4")
+        val videoStart = File(reportDir, "video/run.start").takeIf { it.isFile }?.readText()?.trim()?.toLongOrNull()
+            ?.takeIf { video.isFile }
+
+        val classRegex = Regex("\"class_name\":\"([^\"]+)\"")
+        val nameRegex = Regex("\"name\":\"([^\"]+)\"")
+        val statusRegex = Regex("\"status\":\"([^\"]+)\"")
+        var screenshots = 0
+        var clips = 0
+
+        html.resolve("pools").walkTopDown()
+            .filter { it.isFile && it.extension == "html" && it.name != "index.html" && it.parentFile.name != "logs" }
+            .forEach { page ->
+                var text = page.readText()
+                if (!text.contains("window.test")) return@forEach
+                val cls = classRegex.find(text)?.groupValues?.get(1) ?: return@forEach
+                val method = nameRegex.find(text)?.groupValues?.get(1) ?: return@forEach
+                val failed = statusRegex.find(text)?.groupValues?.get(1) == "failed"
+                fun rel(file: File) = page.parentFile.toPath().relativize(file.toPath()).toString().replace('\\', '/')
+
+                // Screenshot
+                val fileName = "${cls}_$method.png"
+                listOf(if (failed) "screenshots" else "evidence", "evidence", "screenshots")
+                    .map { File(pulled, "$it/$fileName") }.firstOrNull { it.isFile }
+                    ?.let { source ->
+                        val copy = File(target, fileName)
+                        source.copyTo(copy, overwrite = true)
+                        text = text.replace(Regex("\"screenshot\":\"[^\"]*\""), "\"screenshot\":\"${rel(copy)}\"")
+                        screenshots++
+                    }
+
+                // Video clip: whole seconds only (the report's player rejects decimals in #t=).
+                if (videoStart != null) {
+                    timings["$cls#$method"]?.let { (start, duration) ->
+                        val from = ((start - videoStart) / 1000 - 1).coerceAtLeast(0)
+                        val to = (start + duration - videoStart) / 1000 + 2
+                        text = text.replace(Regex("\"videos\":\\[[^\\]]*\\]"), "\"videos\":[\"${rel(video)}#t=$from,$to\"]")
+                        clips++
+                    }
+                }
+                page.writeText(text)
+            }
+        logger.lifecycle(
+            "Marathon report: $screenshots screenshot(s), $clips video clip(s)" +
+                (if (videoStart == null) " (no video/run.mp4 found)" else "") + " → ${html.resolve("index.html")}",
+        )
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

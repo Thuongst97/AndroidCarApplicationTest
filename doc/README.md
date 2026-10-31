@@ -13,6 +13,7 @@ favorite spots in Da Nang.
 | [COMPOSE_TEST_CAPABILITIES.md](COMPOSE_TEST_CAPABILITIES.md) | What Compose UI tests can and cannot test (clicks, gestures, state, layout, accessibility vs colours, visuals, system UI, hardware, performance), workarounds, and which tool to use instead |
 | [COMPOSE_TEST_STANDARD.md](COMPOSE_TEST_STANDARD.md) | The reusable Compose test template: layers (framework → app config → robots → tests), the standard test method, screen contract, templates in [`templates/`](templates/), and how to apply it to another app |
 | [HOW_COMPOSE_TESTING_WORKS.md](HOW_COMPOSE_TESTING_WORKS.md) | The mechanism behind Compose UI tests: instrumentation, the semantics tree, synchronization and the virtual clock, input injection, assertions — with diagrams |
+| [GRADLE_COMPOSE_TEST_SETUP.md](GRADLE_COMPOSE_TEST_SETUP.md) | How to configure Gradle to build the Compose test APK (runner, dependencies, packaging, options), build the APKs, and run the tests with Gradle, `scripts\run_composet_test.bat`, adb, Android Studio or ATR; troubleshooting and a checklist for new apps |
 | [HOW_TO_RUN_TESTS.md](HOW_TO_RUN_TESTS.md) | Prerequisites, connecting the Pi, commands for running unit and UI tests, reading reports, troubleshooting |
 
 ## Quick start

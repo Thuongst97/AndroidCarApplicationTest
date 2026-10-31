@@ -8,3 +8,12 @@ build/
 .externalNativeBuild
 .cxx
 .kotlin/
+
+# ATR test results
+atr-results/
+report-tool/build/
+report-tool/.gradle/
+report-tool/.kotlin/
+results/
+results-demo/
+test-run-report/

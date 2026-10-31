@@ -35,6 +35,7 @@ class MediaCompanionTest {
     private val track = TestData.track
 
     @Test
+    @Smoke
     fun playPause_tapped_togglesStateAndCallsViewModel() {
         // Given: real ViewModel + use cases over a MockK repository
         val player = MutableStateFlow(MediaState(track = track, queueSize = 1))

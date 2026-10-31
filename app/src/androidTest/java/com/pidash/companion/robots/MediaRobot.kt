@@ -30,10 +30,12 @@ class MediaRobot(rule: AppComposeRule) : BaseRobot(rule) {
         node(TestTags.MEDIA_SLIDER).performTouchInput {
             swipeRight(startX = left + width * 0.05f, endX = left + width * fraction, durationMillis = 400)
         }
+        rule.observe()
     }
 
     fun tapProgressAt(fraction: Float) {
         node(TestTags.MEDIA_SLIDER).performTouchInput { click(percentOffset(fraction, 0.5f)) }
+        rule.observe()
     }
 
     // ---- checks ----

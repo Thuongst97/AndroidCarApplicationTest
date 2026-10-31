@@ -38,20 +38,24 @@ abstract class BaseRobot(protected val rule: AppComposeRule) {
     // ---- actions ------------------------------------------------------------------------------
     fun tap(tag: String) {
         node(tag).performClick()
+        rule.observe()
     }
 
     fun scrollTo(containerTag: String, targetTag: String) {
         node(containerTag).performScrollToNode(hasTestTag(targetTag))
+        rule.observe()
     }
 
     fun focus(tag: String) {
         node(tag).requestFocus()
+        rule.observe()
     }
 
     /** Press the rotary knob / D-pad centre on [tag] (must be focused). */
     @OptIn(ExperimentalTestApi::class)
     fun pressCenter(tag: String) {
         node(tag).performKeyInput { pressKey(Key.DirectionCenter) }
+        rule.observe()
     }
 
     // ---- checks -------------------------------------------------------------------------------

@@ -1,0 +1,47 @@
+# ATR — Android Test Runner configuration for Pi-Dash (tool: report-tool/).
+# Build APKs:  .\gradlew :app:assembleDebug :app:assembleDebugAndroidTest
+# Run:         atr run                    (all tests)
+#              atr run --include Smoke    (tagged tests)    atr run -t "*mute*"   (by name)
+# Report:      atr-results/report.html
+
+name: "Pi-Dash Compose UI tests"
+
+device:
+  serial: "192.168.1.140:35381"       # Raspberry Pi head unit (update if wireless debugging gets a new port)
+
+apks:
+  app: app/build/outputs/apk/debug/app-debug.apk
+  test: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+install: true
+
+appPackage: com.pidash.companion
+instrumentation: auto
+
+instrumentationArgs:
+  evidenceScreenshots: "true"         # tests save evidence/<Test>.png (testing/Screenshots.kt)
+  observeStepMs: "1500"               # real-time play after each action, for readable videos
+  observeHoldMs: "3000"               # hold the final screen before the test closes
+
+tags:
+  Smoke: com.pidash.companion.Smoke
+
+execution:
+  retries: 1
+  timeoutSeconds: 300
+
+artifacts:
+  video: always
+  logcat: true
+  pullPaths:
+    - /sdcard/Android/data/com.pidash.companion/files/test-screenshots
+
+scrcpy:
+  path: scrcpy
+  args:
+    - --video-codec=h264
+    - --video-encoder=c2.android.avc.encoder   # the Pi has no usable hardware encoder
+    - --max-fps=15
+    - --video-bit-rate=2M
+
+output:
+  dir: atr-results

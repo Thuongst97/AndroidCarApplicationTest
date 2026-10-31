@@ -41,15 +41,20 @@ class NavigationTest {
     private fun backStackRoutes() = navController.currentBackStack.value.mapNotNull { it.destination.route }
 
     @Test
+    @Smoke
     fun railReturnsToDashboard_afterQuickStopOpenedSpots() {
         // Regression: Media -> Drive via rail saved a stack under the start destination, which
         // was then restored when tapping Drive again from a quick-stop Spots screen.
         rule.runOnIdle { navController.navigateToTopLevel(Routes.MEDIA) }
+        rule.observe() // real-time pause in observation mode (no-op otherwise)
         rule.runOnIdle { navController.navigateToTopLevel(Routes.DASHBOARD) }
+        rule.observe() // real-time pause in observation mode (no-op otherwise)
         rule.runOnIdle { navController.navigate(Routes.spots(SpotCategory.COFFEE)) }
+        rule.observe() // real-time pause in observation mode (no-op otherwise)
         rule.onNodeWithText("Spots:COFFEE").assertIsDisplayed()
 
         rule.runOnIdle { navController.navigateToTopLevel(Routes.DASHBOARD) }
+        rule.observe() // real-time pause in observation mode (no-op otherwise)
 
         rule.onNodeWithText("Dashboard").assertIsDisplayed()
         rule.runOnIdle { assertEquals(listOf(Routes.DASHBOARD), backStackRoutes()) }
@@ -58,11 +63,14 @@ class NavigationTest {
     @Test
     fun railSwitchesBetweenAllDestinations_keepingDashboardAsRoot() {
         rule.runOnIdle { navController.navigate(Routes.spots(SpotCategory.FOOD)) }
+        rule.observe() // real-time pause in observation mode (no-op otherwise)
         rule.runOnIdle { navController.navigateToTopLevel(Routes.MEDIA) }
+        rule.observe() // real-time pause in observation mode (no-op otherwise)
         rule.onNodeWithText("Media").assertIsDisplayed()
         rule.runOnIdle { assertEquals(listOf(Routes.DASHBOARD, Routes.MEDIA), backStackRoutes()) }
 
         rule.runOnIdle { navController.navigateToTopLevel(Routes.spots()) }
+        rule.observe() // real-time pause in observation mode (no-op otherwise)
         rule.onNodeWithText("Spots:null").assertIsDisplayed()
         rule.runOnIdle { assertEquals(listOf(Routes.DASHBOARD, Routes.SPOTS), backStackRoutes()) }
     }
