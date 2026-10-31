@@ -6,6 +6,7 @@ favorite spots in Da Nang.
 
 | Document | What it covers |
 |---|---|
+| [compose-test-guideline/](compose-test-guideline/README.md) | **Beginner course:** understand, write and run Compose UI tests for any app, in 10 chapters with diagrams, step-by-step examples, exercises, troubleshooting and a cheat sheet |
 | [MAINTENANCE_GUIDE.md](MAINTENANCE_GUIDE.md) | For maintainers: how a Kotlin/Compose Android app runs, architecture and runtime object graph, component reference, main code flows (startup, data, events, media, navigation, external intents, rotary), Kotlin features used, threading/scopes, build system, common tasks, debugging, technical debt |
 | [DESIGN.md](DESIGN.md) | Architecture, data flow, the "Midnight & Champagne" visual design system, components, screens and the main technical decisions |
 | [TEST_INSTRUCTIONS.md](TEST_INSTRUCTIONS.md) | What the automated tests cover and why, how to write new tests in the same style, and the manual on-device checklist |
