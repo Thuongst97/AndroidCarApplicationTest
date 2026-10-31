@@ -116,6 +116,7 @@ rem Remove results of earlier runs so a failed build never shows a stale report.
 if exist "app\build\reports\androidTests\connected" rd /s /q "app\build\reports\androidTests\connected"
 if exist "app\build\outputs\androidTest-results\connected" rd /s /q "app\build\outputs\androidTest-results\connected"
 if exist "app\build\outputs\code_coverage\debugAndroidTest\connected" rd /s /q "app\build\outputs\code_coverage\debugAndroidTest\connected"
+if exist "app\build\outputs\connected_android_test_additional_output" rd /s /q "app\build\outputs\connected_android_test_additional_output"
 
 rem Full path: cmd may not search the current folder (NoDefaultCurrentDirectoryInExePath).
 if defined FILTER (
@@ -127,8 +128,11 @@ set "RC=%ERRORLEVEL%"
 
 rem Copy results (also after failures: the report shows what failed)
 if exist "%REPORT%" rd /s /q "%REPORT%"
-mkdir "%REPORT%\html" "%REPORT%\results" "%REPORT%\coverage" >nul
+mkdir "%REPORT%\html" "%REPORT%\results" "%REPORT%\coverage" "%REPORT%\device-files" >nul
+rem html\ includes html\screenshots\ (failure screenshots, shown under each failed test)
 xcopy /e /i /q /y "app\build\reports\androidTests\connected\debug" "%REPORT%\html" >nul 2>&1
+rem All files the tests saved on the device (failure and theme screenshots)
+xcopy /e /i /q /y "app\build\outputs\connected_android_test_additional_output\debugAndroidTest\connected" "%REPORT%\device-files" >nul 2>&1
 xcopy /e /i /q /y "app\build\outputs\androidTest-results\connected\debug" "%REPORT%\results" >nul 2>&1
 xcopy /e /i /q /y "app\build\outputs\code_coverage\debugAndroidTest\connected" "%REPORT%\coverage" >nul 2>&1
 

@@ -166,6 +166,19 @@ Both kinds are written through `TestStorage` and pulled by Gradle into
 | `screenshots/<TestClass>_<method>.png` | Only when a test **fails** | `ScreenshotOnFailureRule`, chained automatically inside `piDashComposeRule()` |
 | `screens/<Screen>_dark.png`, `_light.png`, `_maxFont.png` | Every run — a gallery of all screens | The contract tests (`ScreenContractTest`) |
 
+**Failure screenshots in the HTML report.** Gradle's HTML report does not show these files by itself.
+The `attachFailureScreenshots` task (in `app/build.gradle.kts`) runs automatically after
+`connectedDebugAndroidTest`, even when tests fail. It copies each failure screenshot into the report's
+`screenshots/` folder and shows it under the failed test's stack trace, as
+"Screen at the moment of failure". The Gradle output prints how many were attached:
+`Failure screenshots: 5 attached, 0 unavailable`.
+
+If the app's UI no longer exists when a test fails (for example, Back closed the app), the rule
+captures the **whole device screen** instead, so the screenshot shows what was really on screen: the
+launcher, another app or a system dialog. `scripts\run_composet_test.bat` copies the report with its
+screenshots to `test-run-report\html\`, and all device files to `test-run-report\device-files\`.
+Espresso may also save its own `view-op-error-N.png` captures there.
+
 ## 7. Troubleshooting
 
 | Symptom | Cause / fix |

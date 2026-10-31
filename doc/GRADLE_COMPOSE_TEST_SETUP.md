@@ -379,8 +379,8 @@ See [report-tool/README.md](../report-tool/README.md) and the user guide in the 
 | Run with | Results |
 |---|---|
 | Gradle | `app\build\reports\androidTests\connected\debug\index.html` (HTML)<br>`app\build\outputs\androidTest-results\connected\debug\` (JUnit XML, per-test logcat)<br>`app\build\outputs\code_coverage\debugAndroidTest\connected\` (`coverage.ec`) |
-| `run_composet_test.bat` | `test-run-report\html\index.html`, `test-run-report\results\`, `test-run-report\coverage\` |
-| Failure screenshots (TestStorage) | `app\build\outputs\connected_android_test_additional_output\…\screenshots\` |
+| `run_composet_test.bat` | `test-run-report\html\index.html` (failure screenshots shown under each failed test), `test-run-report\results\`, `test-run-report\coverage\`, `test-run-report\device-files\` |
+| Failure screenshots (TestStorage) | `app\build\outputs\connected_android_test_additional_output\…\screenshots\`; the `attachFailureScreenshots` task (run automatically after `connectedDebugAndroidTest`) also copies them into the HTML report |
 | ATR | `atr-results\report.html`, `junit.xml`, `output.json`, `artifacts\` |
 
 ---

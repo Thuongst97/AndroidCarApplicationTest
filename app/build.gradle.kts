@@ -184,6 +184,63 @@ tasks.register("attachMarathonEvidence") {
     }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Failure screenshots in Gradle's connected-test HTML report.
+// ScreenshotOnFailureRule saves screenshots/<Class>_<method>.png through TestStorage and Gradle pulls
+// them into build/outputs/connected_android_test_additional_output, but Gradle's HTML report does not
+// show them. This task copies them into the report and shows each one under its failed test.
+// Runs automatically after connectedDebugAndroidTest, also when tests fail.
+// ---------------------------------------------------------------------------------------------
+val attachFailureScreenshots = tasks.register("attachFailureScreenshots") {
+    group = "verification"
+    description = "Shows the failure screenshot under each failed test in the connected-test HTML report."
+    val reportDir = layout.buildDirectory.dir("reports/androidTests/connected/debug")
+    val pulledDir = layout.buildDirectory.dir("outputs/connected_android_test_additional_output/debugAndroidTest/connected")
+
+    doLast {
+        val report = reportDir.get().asFile
+        if (!File(report, "index.html").isFile) {
+            logger.lifecycle("No connected-test HTML report in $report; nothing to attach.")
+            return@doLast
+        }
+        val shots = pulledDir.get().asFile.walkTopDown()
+            .filter { it.isFile && it.extension == "png" && it.parentFile.name == "screenshots" }
+            .associateBy { it.name }
+        val target = File(report, "screenshots").apply { deleteRecursively(); mkdirs() }
+        // One block per failed test: <h3 class="failures">method</h3> <span class="code"><pre>…</pre></span>
+        val failedTest = Regex("""<h3 class="failures">([^<]+)</h3>(.*?)</span>""", RegexOption.DOT_MATCHES_ALL)
+        var attached = 0
+        var missing = 0
+
+        report.listFiles { f -> f.extension == "html" }.orEmpty().forEach { page ->
+            var text = page.readText()
+            if (!text.contains("<h3 class=\"failures\">") || text.contains("failure-screenshot")) return@forEach
+            val simpleClass = page.name.removeSuffix(".html").substringAfterLast('.')
+            text = failedTest.replace(text) { match ->
+                val name = "${simpleClass}_${match.groupValues[1].trim()}.png"
+                val shot = shots[name]
+                val evidence = if (shot != null) {
+                    shot.copyTo(File(target, name), overwrite = true)
+                    attached++
+                    """<div class="failure-screenshot"><p><b>Screen at the moment of failure</b></p>""" +
+                        """<a href="screenshots/$name"><img src="screenshots/$name" alt="$name" """ +
+                        """style="max-width:480px;border:1px solid #ccc;border-radius:4px"/></a></div>"""
+                } else {
+                    missing++
+                    """<p class="failure-screenshot"><i>No screenshot: the UI no longer existed when the test """ +
+                        """failed (for example, the app closed). See the logcat in the results folder.</i></p>"""
+                }
+                match.value + evidence
+            }
+            page.writeText(text)
+        }
+        logger.lifecycle("Failure screenshots: $attached attached, $missing unavailable → ${File(report, "index.html")}")
+    }
+}
+tasks.configureEach {
+    if (name == "connectedDebugAndroidTest") finalizedBy(attachFailureScreenshots)
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

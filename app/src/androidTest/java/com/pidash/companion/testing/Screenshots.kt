@@ -48,6 +48,16 @@ fun ComposeContentTestRule.saveScreenshot(path: String): Boolean = runCatching {
 }.onFailure { Log.w(TAG, "Could not save screenshot $path", it) }.isSuccess
 
 /**
+ * Saves the whole device screen (status bar, other apps, launcher) as a PNG at [path]. Used when the
+ * app's UI no longer exists, e.g. a test failed because Back closed the app.
+ */
+fun saveDeviceScreenshot(path: String): Boolean = runCatching {
+    val bitmap = checkNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()) { "no device screenshot" }
+    openScreenshotOutput(path).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
+    Log.i(TAG, "Saved device screenshot: $path")
+}.onFailure { Log.w(TAG, "Could not save device screenshot $path", it) }.isSuccess
+
+/**
  * Captures `screenshots/<Class>_<method>.png` when a test fails, and — when
  * [evidenceScreenshotsEnabled] — `evidence/<Class>_<method>.png` (final screen) when it passes.
  * Must run *inside* the compose rule so the composition still exists; [AppComposeRule] chains it.
@@ -59,7 +69,9 @@ class ScreenshotOnFailureRule(
 ) : TestWatcher() {
     override fun failed(e: Throwable, description: Description) {
         runCatching(beforeCapture)
-        composeRule.saveScreenshot("screenshots/${description.fileName()}")
+        val path = "screenshots/${description.fileName()}"
+        // No composition left (app closed, activity gone): capture the device screen instead.
+        if (!composeRule.saveScreenshot(path)) saveDeviceScreenshot(path)
     }
 
     override fun succeeded(description: Description) {
